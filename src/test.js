@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from 'primereact/button';
 import { TabView, TabPanel } from 'primereact/tabview';
-import './css/ButtonDemo.css'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { ProductService } from './service/ProductService';
 import { ToggleButton } from 'primereact/togglebutton';
-import { AutoComplete } from 'primereact/autocomplete';
-import TextField from "@mui/material/TextField";
-//1
+import { InputText } from 'primereact/inputtext';
+import "./css/ButtonDemo.css"
+import { Button } from 'primereact/button';
+import moment from 'moment/moment';
+
+//1,8
 export default function Getfromfile() {
   const [data, setData] = useState([])
+  const [refresh, setRefresh] = useState(true)
+
   useEffect(() => {
     async function fetchMyAPI() {
       let response = await fetch('angular_react_Response.json')
@@ -21,120 +23,115 @@ export default function Getfromfile() {
   }, [])
   return (
     <div>
-      {JSON.stringify(data)}
-      <br />
-      ------------------------------------------------------------
+      {/* onClick={setRefresh(true) }*/}
+       {/* <Button label="Refresh" className="p-button-rounded" /> */}
+      {/* {refresh ? */}
+        <div>{JSON.stringify(data)}</div> :
+        <div></div>
+      {/* } */}
       <br />
       {data.length > 0 ?
         <div>
-        <ToggleButtonDemo dataFromFile={data}/>
-        {/* <AutoCompleteDemo  dataFromFile={data}/> */}
+          <ToggleButtonDemo dataFromFile={data} />
+          <Search dataFromFile={data} />
+          <FormatedYear dataFromFile={data}/>
         </div> :
         <div></div>}
     </div>
   )
 }
-
-
 //2
-export  function GetByType(props) {
+//במייל
+//3
+export function GetByType(props) {
   const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
-
-  // useEffect(async () => {
-  //   await  fetch("angular_react_Response.json")
-  
-  //   .then(response => {
-  //     if (response.ok && response.status == 204)
-  //       alert("שגיאה!!!")
-  //     if (response.ok)
-  //       return response.json();
-  //     else
-  //       throw new Error(response.status)
-  //   })
-  //   .then(data => { 
-  //     setDataFromFile(data);  
-  //     console.log(dataFromFile, "dataFromFile22222");
-  //     console.log(data, "data222");
-  //     return data;
-  //   })
-  //   .catch(err => console.log(err))
-  //   }, []);
-
-
-  // const [countsAndType,setCountsAndType] = useState([]);
-  // const [curentCountsAndType,setCurentCountsAndType] = useState([]);
-  const counts = [];
+  const counts = {};
 
   function compare(a, b) {
-    if (a.Type < b.Type) {
-      return -1;
+    if (props.howSendMe == "Getfromfile" || props.howSendMe == "ShowAsc") {
+      if (a.Type < b.Type) {
+        return -1;
+      }
+      if (a.Type > b.Type) {
+        return 1;
+      }
+      return 0;
     }
-    if (a.Type > b.Type) {
-      return 1;
+    else if (props.howSendMe == "ShowDesc") {
+      if (a.Type < b.Type) {
+        return 1;
+      }
+      if (a.Type > b.Type) {
+        return -1;
+      }
+      return 0;
     }
-    return 0;
   }
   return (
     <div>
-      {[...dataFromFile]
-        .sort(compare)
-        .map(dataFromFile => {
-          counts[dataFromFile.Type] = (counts[dataFromFile.Type] || 0) + 1;
-          // setCurentCountsAndType(...dataFromFile,curentCountsAndType.Type=dataFromFile.Type);
-          // setCurentCountsAndType(...dataFromFile,curentCountsAndType.Count=(countsAndType[dataFromFile.Type] || 0) + 1);
-          // countsAndType[dataFromFile.Type] = (countsAndType[dataFromFile.Type] || 0) + 1; 
-
-          return (
-            <div key={dataFromFile.imdbID}>
-              <h5>Title: {dataFromFile.Title}</h5>
-              <h5>Year: {dataFromFile.Year}</h5>
-              <h5>imdbID: {dataFromFile.imdbID}</h5>
-              <h5>Type: {dataFromFile.Type}</h5>
-              <h5>Poster: {dataFromFile.Poster}</h5>
-              <hr />
-            </div>
-          );
+      {dataFromFile.sort(compare).map(dataFromFile => {
+        counts[dataFromFile.Type] = (counts[dataFromFile.Type] || 0) + 1;
+        return (
+          <div key={dataFromFile.imdbID}>
+            <h5>Title: {dataFromFile.Title}</h5>
+            <h5>Year: {dataFromFile.Year}</h5>
+            <h5>imdbID: {dataFromFile.imdbID}</h5>
+            <h5>Type: {dataFromFile.Type}</h5>
+            <h5>Poster: {dataFromFile.Poster}</h5>
+            <hr />
+          </div>
+        );
+      })}
+      {
+        Object.entries(counts).forEach(entry => {
+          const [key, value] = entry;
+          console.log(key, value);
         })
-
       }
-
-      {/* {setCountsAndType(...countsAndType,curentCountsAndType)} */}
-      {console.log(counts)}
-      ------------------------------------------------------
-      {dataFromFile.length > 0 ?
+      {dataFromFile.length > 0 && props.howSendMe == "Getfromfile" ?
         <div>
-
-          {/* <GetByTabs CountAndType={counts} /> */}
-          {/* DataFromFile={dataFromFile} */}
+          <GetByTabs CountAndType={counts} DataFromFile={dataFromFile} />
         </div> :
         <div></div>}
     </div>
   );
 }
-
-// 3
+// 4
 export function GetByTabs(props) {
   const [countAndType, setCountAndType] = useState(props.CountAndType);
   const [dataFromFile, setDataFromFile] = useState(props.DataFromFile);
+  const countArray = [];
   return (
     <div>
-      {console.log(countAndType)}
+      {Object.entries(countAndType).forEach(entry => {
+        countArray.push(entry);
+      })}
+
       <TabView>
-        {countAndType.Type.map(c =>
-          <TabPanel header={c}>
-            {/* {dataFromFile.map(d=>
-          d.Type == c.name?
-          <div>id: {d.id},
-           Type: {d.Type} 
-          </div>:
-          <div></div>
-          )} */}
-          </TabPanel>)}
+        {countArray.map(e => {
+          return (
+            <TabPanel header={e}>
+              {dataFromFile.map(d => {
+                if (d.Type == e[0])
+                  return (
+                    <div>
+                      <h5>Title: {d.Title}</h5>
+                      <h5>Year: {d.Year}</h5>
+                      <h5>imdbID: {d.imdbID}</h5>
+                      <h5>Type: {d.Type}</h5>
+                      <h5>Poster: {d.Poster}</h5>
+                      ------------------
+                    </div>
+                  )
+              })}
+            </TabPanel>
+          )
+        })}
       </TabView>
     </div>
   )
 }
-//4
+//5
 export function ToggleButtonDemo(props) {
   const [checked2, setChecked2] = useState(false);
   const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
@@ -145,31 +142,23 @@ export function ToggleButtonDemo(props) {
         <ToggleButton checked={checked2} onChange={(e) => setChecked2(e.value)} onLabel="Grid" offLabel="List" onIcon="pi pi-check" offIcon="pi pi-times" className="w-full sm:w-10rem" aria-label="Confirmation" />                </div>
       {checked2 ?
         <div>
-          <Grid dataFromFile={dataFromFile}/>
+          <Grid dataFromFile={dataFromFile} />
+
         </div> :
         <div>
-          <GetByType dataFromFile={dataFromFile}/>
+          <GetByType dataFromFile={dataFromFile} howSendMe={"Getfromfile"} />
         </div>}
+      <ShowDescOrAsc dataFromFile={dataFromFile} />
     </div>
   );
 }
 export function Grid(props) {
-  const [products, setProducts] = useState(null);
-  const productService = new ProductService();
-  const [dataFromFile,setDataFromFile] = useState(props.dataFromFile);
-
-//   useEffect(() => {
-//     getProductsSmall().then(data => setProducts(data));
-//   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-//  function getProductsSmall() {
-//     return fetch('angular_react_Response.json').then(res => res.json()).then(d => d.data);
-// }
+  const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
 
   return (
     <div>
       <div className="card">
-        <DataTable value={dataFromFile}  showGridlines responsiveLayout="scroll">
+        <DataTable value={dataFromFile} showGridlines responsiveLayout="scroll">
           <Column field="Title" header="Title"></Column>
           <Column field="Year" header="Year"></Column>
           <Column field="imdbID" header="imdbID"></Column>
@@ -180,37 +169,85 @@ export function Grid(props) {
     </div>
   );
 }
-//5
+//6,7
+export function Search(props) {
+  const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
+  const [value, setValue] = useState('');
+  const [inputText, setInputText] = useState('');
+  const [clear, setClear] = useState('');
 
-// export   function AutoCompleteDemo  (props)  {
+  let inputHandler = (e) => {
+    setValue(e.target.value);
+    var lowerCase = e.target.value.toLowerCase();
+    setInputText(lowerCase);
+  }
 
-//     const [countries, setCountries] = useState(props.dataFromFile);
-//     const [selectedCountry1, setSelectedCountry1] = useState(null);
-//     const [filteredCountries, setFilteredCountries] = useState(null);
+  return (
+    <div>
+      <span className="p-input-icon-left">
+        <i className="pi pi-search" />
+        <InputText value={value} onChange={inputHandler} placeholder="Search" />
+      </span>
+      <Button label="Clear Search" className="p-button-text"  
+      onClick={()=>{return(setValue(''),setInputText(''))}}/>
+      <div> <List dataFromFile={dataFromFile} input={inputText} /></div>
+    </div>
+  )
+}
+export function List(props) {
+  const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
+  const filteredData = dataFromFile.filter((el) => {
+    if (props.input === '') {
+      return el;
+    }
+    else if (props.input >= 0) {
+      return el.Year.toLowerCase().includes(props.input)
+    }
+    else {
+      return el.Type.toLowerCase().includes(props.input)
+    }
 
-//      const searchCountry = (event) => {
-//         setTimeout(() => {
-//             let _filteredCountries;
-//             if (!event.query.trim().length) {
-//                 _filteredCountries = [...countries];
-//             }
-//             else {
-//                 _filteredCountries = countries.filter((country) => {
-//                     return country.Type.toLowerCase().includes(event.query.toLowerCase());
-//                 });
-//             }
-//             console.log(_filteredCountries);
-//             setFilteredCountries(_filteredCountries);
-//         }, 250);
-//     }
+  })
 
-//     return (
-//         <div className="card">
-//             <h3>Search by type or year</h3>
-//             <AutoComplete value={selectedCountry1}  completeMethod={searchCountry} field="name" onChange={(e) => setSelectedCountry1(e.value)} aria-label="Countries" />
-//             {/* suggestions={filteredCountries} */}
-//             <GetByType dataFromFile={filteredCountries}/>
-//         </div>
-//     )
-// }
-                 
+  return (
+    <ul>
+      {filteredData.map((item) => (
+        <li >
+          <h5> Title : {item.Title}</h5>
+          <h5> Year : {item.Year}</h5>
+          <h5> imdbID : {item.imdbID}</h5>
+          <h5> Type : {item.Type}</h5>
+          <h5> Poster : {item.Poster}</h5>
+        </li>
+      ))}
+    </ul>
+  )
+}
+//9
+export function ShowDescOrAsc(props) {
+  const [checked2, setChecked2] = useState(false);
+  const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
+  return (
+    <div>
+      <div className="card">
+        <ToggleButton checked={checked2} onChange={(e) => setChecked2(e.value)} onLabel="Desc" offLabel="Asc" onIcon="pi pi-check" offIcon="pi pi-times" className="w-full sm:w-10rem" aria-label="Confirmation" />                </div>
+      {checked2 ?
+        <div>
+          <GetByType dataFromFile={dataFromFile} howSendMe={"ShowDesc"} />
+        </div> :
+        <div>
+          <GetByType dataFromFile={dataFromFile} howSendMe={"ShowAsc"} />
+        </div>}
+    </div>
+  )
+}
+export function FormatedYear(props){
+  const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
+  return (
+  <div>
+    <h3>Year:</h3>
+    {dataFromFile.map(data=>
+   <h5>{moment(data.Year).format('L')}</h5>)}
+  </div>
+  )
+}

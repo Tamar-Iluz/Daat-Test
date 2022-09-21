@@ -4,24 +4,12 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Getfromfile from './test';
-import GetByType from './test';
-import GetByTabs from './test';
-import Grid from './test';
-import ToggleButtonDemo from './test';
-import AutoCompleteDemo from './test';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <Getfromfile/>
-    {/* <GetByType/> */}
-    {/* <GetByTabs/> */}
-    {/* <Grid/> */}
-    {/* <ToggleButtonDemo/> */}
-    {/* <AutoCompleteDemo/> */}
-
-
   </React.StrictMode>
 );
 
