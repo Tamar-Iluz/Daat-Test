@@ -8,44 +8,97 @@ import "./css/ButtonDemo.css"
 import { Button } from 'primereact/button';
 import moment from 'moment/moment';
 
-//1,8
-export default function Getfromfile() {
-  const [data, setData] = useState([])
-  const [refresh, setRefresh] = useState(true)
+//main
+export default function Main() {
+  const [mainData, setMainData] = useState([])
+  const [mainCount, setMainCount] = useState()
 
+  return (
+    <>
+      <TabView>
+        <TabPanel header={"api call"}>
+          <div>
+            <Getfromfile setMainData={setMainData} />
+            <div> {JSON.stringify(mainData)}</div>
+          </div>
+        </TabPanel>
+        <TabPanel header={"show by type and split"}>
+          <div>
+            {mainData.length > 0 ?
+              <div>
+                <GetByType dataFromFile={mainData} howSendMe={"Getfromfile"} setMainCount={setMainCount} />
+                {console.log(mainCount, "mainCount")}
+              </div> :
+              <div></div>}
+          </div>
+        </TabPanel>
+        <TabPanel header={"show by tabs"}>
+          <div>
+            {mainData.length > 0 ?
+              <div>
+                <GetByTabs CountAndType={mainCount} DataFromFile={mainData} />
+              </div> :
+              <div></div>}
+          </div>
+        </TabPanel>
+        <TabPanel header={"show in list or grid"}>
+          <div>
+            {mainData.length > 0 ?
+              <div>
+                <ToggleButtonDemo dataFromFile={mainData} setMainCount={setMainCount} />
+              </div> :
+              <div></div>
+            }
+          </div>
+        </TabPanel>
+        <TabPanel header={"search field and clear "}>
+          <div>
+            {mainData.length > 0 ?
+              <div> <Search dataFromFile={mainData} />
+              </div> :
+              <div></div>}
+          </div>
+        </TabPanel>
+        <TabPanel header={"show asc or desc"}>
+          <div>
+            {<ShowDescOrAsc dataFromFile={mainData} setMainCount={setMainCount} />}
+          </div>
+        </TabPanel>
+        <TabPanel header={"show format year"}>
+          <div>
+            {mainData.length > 0 ?
+              <div><FormatedYear dataFromFile={mainData} /></div>
+              :
+              <div></div>}
+          </div>
+        </TabPanel>
+      </TabView>
+    </>
+  )
+}
+
+//1
+export function Getfromfile(props) {
   useEffect(() => {
     async function fetchMyAPI() {
       let response = await fetch('angular_react_Response.json')
       response = await response.json()
-      setData(response.results)
+      props.setMainData(response.results);
     }
     fetchMyAPI();
   }, [])
   return (
     <div>
-      {/* onClick={setRefresh(true) }*/}
-       {/* <Button label="Refresh" className="p-button-rounded" /> */}
-      {/* {refresh ? */}
-        <div>{JSON.stringify(data)}</div> :
-        <div></div>
-      {/* } */}
-      <br />
-      {data.length > 0 ?
-        <div>
-          <ToggleButtonDemo dataFromFile={data} />
-          <Search dataFromFile={data} />
-          <FormatedYear dataFromFile={data}/>
-        </div> :
-        <div></div>}
     </div>
   )
 }
 //2
-//במייל
-//3
 export function GetByType(props) {
   const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
   const counts = {};
+  useEffect(() => { 
+    props.setMainCount(counts)
+  },[])
 
   function compare(a, b) {
     if (props.howSendMe == "Getfromfile" || props.howSendMe == "ShowAsc") {
@@ -85,18 +138,13 @@ export function GetByType(props) {
       {
         Object.entries(counts).forEach(entry => {
           const [key, value] = entry;
-          console.log(key, value);
         })
       }
-      {dataFromFile.length > 0 && props.howSendMe == "Getfromfile" ?
-        <div>
-          <GetByTabs CountAndType={counts} DataFromFile={dataFromFile} />
-        </div> :
-        <div></div>}
+      
     </div>
   );
 }
-// 4
+//3
 export function GetByTabs(props) {
   const [countAndType, setCountAndType] = useState(props.CountAndType);
   const [dataFromFile, setDataFromFile] = useState(props.DataFromFile);
@@ -131,7 +179,7 @@ export function GetByTabs(props) {
     </div>
   )
 }
-//5
+//4
 export function ToggleButtonDemo(props) {
   const [checked2, setChecked2] = useState(false);
   const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
@@ -146,9 +194,8 @@ export function ToggleButtonDemo(props) {
 
         </div> :
         <div>
-          <GetByType dataFromFile={dataFromFile} howSendMe={"Getfromfile"} />
+          <GetByType dataFromFile={dataFromFile} howSendMe={"Getfromfile"} setMainCount={props.setMainCount} />
         </div>}
-      <ShowDescOrAsc dataFromFile={dataFromFile} />
     </div>
   );
 }
@@ -169,7 +216,7 @@ export function Grid(props) {
     </div>
   );
 }
-//6,7
+//5,6
 export function Search(props) {
   const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
   const [value, setValue] = useState('');
@@ -188,8 +235,8 @@ export function Search(props) {
         <i className="pi pi-search" />
         <InputText value={value} onChange={inputHandler} placeholder="Search" />
       </span>
-      <Button label="Clear Search" className="p-button-text"  
-      onClick={()=>{return(setValue(''),setInputText(''))}}/>
+      <Button label="Clear Search" className="p-button-text"
+        onClick={() => { return (setValue(''), setInputText('')) }} />
       <div> <List dataFromFile={dataFromFile} input={inputText} /></div>
     </div>
   )
@@ -223,7 +270,7 @@ export function List(props) {
     </ul>
   )
 }
-//9
+//7
 export function ShowDescOrAsc(props) {
   const [checked2, setChecked2] = useState(false);
   const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
@@ -233,21 +280,21 @@ export function ShowDescOrAsc(props) {
         <ToggleButton checked={checked2} onChange={(e) => setChecked2(e.value)} onLabel="Desc" offLabel="Asc" onIcon="pi pi-check" offIcon="pi pi-times" className="w-full sm:w-10rem" aria-label="Confirmation" />                </div>
       {checked2 ?
         <div>
-          <GetByType dataFromFile={dataFromFile} howSendMe={"ShowDesc"} />
+          <GetByType dataFromFile={dataFromFile} howSendMe={"ShowDesc"} setMainCount={props.setMainCount} />
         </div> :
         <div>
-          <GetByType dataFromFile={dataFromFile} howSendMe={"ShowAsc"} />
+          <GetByType dataFromFile={dataFromFile} howSendMe={"ShowAsc"} setMainCount={props.setMainCount} />
         </div>}
     </div>
   )
 }
-export function FormatedYear(props){
+export function FormatedYear(props) {
   const [dataFromFile, setDataFromFile] = useState(props.dataFromFile);
   return (
-  <div>
-    <h3>Year:</h3>
-    {dataFromFile.map(data=>
-   <h5>{moment(data.Year).format('L')}</h5>)}
-  </div>
+    <div>
+      <h3>Year:</h3>
+      {dataFromFile.map(data =>
+        <h5>{moment(data.Year).format('L')}</h5>)}
+    </div>
   )
 }
